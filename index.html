@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link-in-Bio Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #e3f2fd; padding: 20px; }
+        .container { max-width: 500px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2); margin: auto; }
+        input, button { width: 90%; padding: 10px; margin: 5px 0; border-radius: 5px; font-size: 16px; }
+        input { border: 2px solid #007BFF; }
+        button { cursor: pointer; background-color: #007BFF; color: white; border: none; }
+        button:hover { background-color: #0056b3; }
+        #profileCard { display: none; background: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); margin-top: 20px; }
+        .link-btn { display: block; background: #007BFF; color: white; text-decoration: none; padding: 10px; margin: 5px 0; border-radius: 5px; }
+        .link-btn:hover { background: #0056b3; }
+        footer { margin-top: 20px; font-size: 14px; color: #444; font-weight: bold; }
+        .dark-mode { background-color: #121212; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Link-in-Bio Generator</h2>
+        <input type="text" id="username" placeholder="Pilih Username">
+        <input type="text" id="name" placeholder="Nama Penuh">
+        <input type="url" id="facebook" placeholder="Facebook URL">
+        <input type="url" id="instagram" placeholder="Instagram URL">
+        <input type="url" id="tiktok" placeholder="TikTok URL">
+        <input type="url" id="whatsapp" placeholder="WhatsApp URL">
+        <select id="theme">
+            <option value="light">Tema Cerah</option>
+            <option value="dark">Tema Gelap</option>
+        </select>
+        <button onclick="generateBioPage()">Jana Link-in-Bio</button>
+        
+        <div id="profileCard">
+            <h2 id="displayName"></h2>
+            <p id="displayUsername"></p>
+            <a id="fbLink" class="link-btn" target="_blank">Facebook</a>
+            <a id="igLink" class="link-btn" target="_blank">Instagram</a>
+            <a id="ttLink" class="link-btn" target="_blank">TikTok</a>
+            <a id="waLink" class="link-btn" target="_blank">WhatsApp</a>
+            <div id="qrcode"></div>
+            <button onclick="downloadQRCode()">Muat Turun QR</button>
+            <button onclick="shareQRCode()">Kongsi QR</button>
+        </div>
+    </div>
+    
+    <footer>
+        ©2025 Mr.Syah
+    </footer>
+    
+    <script>
+        function generateBioPage() {
+            let username = document.getElementById("username").value;
+            let name = document.getElementById("name").value;
+            let facebook = document.getElementById("facebook").value;
+            let instagram = document.getElementById("instagram").value;
+            let tiktok = document.getElementById("tiktok").value;
+            let whatsapp = document.getElementById("whatsapp").value;
+            let theme = document.getElementById("theme").value;
+            
+            if (!username || !name) {
+                alert("Sila masukkan username dan nama anda!");
+                return;
+            }
+            
+            document.getElementById("profileCard").style.display = "block";
+            document.getElementById("displayName").innerText = name;
+            document.getElementById("displayUsername").innerText = "@" + username;
+            document.getElementById("fbLink").href = facebook || "#";
+            document.getElementById("igLink").href = instagram || "#";
+            document.getElementById("ttLink").href = tiktok || "#";
+            document.getElementById("waLink").href = whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, '')}` : "#";
+            
+            if (theme === "dark") {
+                document.body.classList.add("dark-mode");
+            } else {
+                document.body.classList.remove("dark-mode");
+            }
+            
+            let bioLink = `${window.location.href}?username=${encodeURIComponent(username)}&name=${encodeURIComponent(name)}&fb=${encodeURIComponent(facebook)}&ig=${encodeURIComponent(instagram)}&tt=${encodeURIComponent(tiktok)}&wa=${encodeURIComponent(whatsapp)}`;
+            document.getElementById("qrcode").innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), bioLink);
+        }
+        
+        function downloadQRCode() {
+            let canvas = document.querySelector("#qrcode canvas");
+            if (!canvas) {
+                alert("Sila jana QR Code terlebih dahulu.");
+                return;
+            }
+            let link = document.createElement("a");
+            link.href = canvas.toDataURL("image/png");
+            link.download = "qrcode.png";
+            link.click();
+        }
+        
+        function shareQRCode() {
+            let bioLink = window.location.href;
+            if (navigator.share) {
+                navigator.share({
+                    title: "Link-in-Bio Saya",
+                    text: "Lihat profil saya di sini:",
+                    url: bioLink
+                }).catch(err => console.log("Gagal berkongsi: ", err));
+            } else {
+                alert("Perkongsian tidak disokong dalam pelayar ini. Anda boleh salin URL secara manual: " + bioLink);
+            }
+        }
+    </script>
+</body>
+</html>
