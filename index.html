@@ -8,8 +8,8 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; background-color: #e3f2fd; padding: 20px; }
         .container { max-width: 500px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2); margin: auto; }
-        input, button { width: 90%; padding: 10px; margin: 5px 0; border-radius: 5px; font-size: 16px; }
-        input { border: 2px solid #007BFF; }
+        input, button, textarea { width: 90%; padding: 10px; margin: 5px 0; border-radius: 5px; font-size: 16px; }
+        input, textarea { border: 2px solid #007BFF; }
         button { cursor: pointer; background-color: #007BFF; color: white; border: none; }
         button:hover { background-color: #0056b3; }
         #profileCard { display: none; background: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); margin-top: 20px; }
@@ -17,6 +17,7 @@
         .link-btn:hover { background: #0056b3; }
         footer { margin-top: 20px; font-size: 14px; color: #444; font-weight: bold; }
         .dark-mode { background-color: #121212; color: white; }
+        #profileImage { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; display: none; margin: 10px auto; }
     </style>
 </head>
 <body>
@@ -24,6 +25,8 @@
         <h2>Link-in-Bio Generator</h2>
         <input type="text" id="username" placeholder="Pilih Username">
         <input type="text" id="name" placeholder="Nama Penuh">
+        <textarea id="bio" placeholder="Bio Ringkas"></textarea>
+        <input type="file" id="profilePic" accept="image/*">
         <input type="url" id="facebook" placeholder="Facebook URL">
         <input type="url" id="instagram" placeholder="Instagram URL">
         <input type="url" id="tiktok" placeholder="TikTok URL">
@@ -35,8 +38,10 @@
         <button onclick="generateBioPage()">Jana Link-in-Bio</button>
         
         <div id="profileCard">
+            <img id="profileImage">
             <h2 id="displayName"></h2>
             <p id="displayUsername"></p>
+            <p id="displayBio"></p>
             <a id="fbLink" class="link-btn" target="_blank">Facebook</a>
             <a id="igLink" class="link-btn" target="_blank">Instagram</a>
             <a id="ttLink" class="link-btn" target="_blank">TikTok</a>
@@ -55,11 +60,13 @@
         function generateBioPage() {
             let username = document.getElementById("username").value;
             let name = document.getElementById("name").value;
+            let bio = document.getElementById("bio").value;
             let facebook = document.getElementById("facebook").value;
             let instagram = document.getElementById("instagram").value;
             let tiktok = document.getElementById("tiktok").value;
             let whatsapp = document.getElementById("whatsapp").value;
             let theme = document.getElementById("theme").value;
+            let profilePic = document.getElementById("profilePic").files[0];
             
             if (!username || !name) {
                 alert("Sila masukkan username dan nama anda!");
@@ -69,6 +76,7 @@
             document.getElementById("profileCard").style.display = "block";
             document.getElementById("displayName").innerText = name;
             document.getElementById("displayUsername").innerText = "@" + username;
+            document.getElementById("displayBio").innerText = bio;
             document.getElementById("fbLink").href = facebook || "#";
             document.getElementById("igLink").href = instagram || "#";
             document.getElementById("ttLink").href = tiktok || "#";
@@ -80,7 +88,17 @@
                 document.body.classList.remove("dark-mode");
             }
             
-            let bioLink = `${window.location.href}?username=${encodeURIComponent(username)}&name=${encodeURIComponent(name)}&fb=${encodeURIComponent(facebook)}&ig=${encodeURIComponent(instagram)}&tt=${encodeURIComponent(tiktok)}&wa=${encodeURIComponent(whatsapp)}`;
+            if (profilePic) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    let img = document.getElementById("profileImage");
+                    img.src = e.target.result;
+                    img.style.display = "block";
+                }
+                reader.readAsDataURL(profilePic);
+            }
+            
+            let bioLink = `https://yourdomain.com/bio?username=${encodeURIComponent(username)}`;
             document.getElementById("qrcode").innerHTML = "";
             new QRCode(document.getElementById("qrcode"), bioLink);
         }
@@ -95,19 +113,6 @@
             link.href = canvas.toDataURL("image/png");
             link.download = "qrcode.png";
             link.click();
-        }
-        
-        function shareQRCode() {
-            let bioLink = window.location.href;
-            if (navigator.share) {
-                navigator.share({
-                    title: "Link-in-Bio Saya",
-                    text: "Lihat profil saya di sini:",
-                    url: bioLink
-                }).catch(err => console.log("Gagal berkongsi: ", err));
-            } else {
-                alert("Perkongsian tidak disokong dalam pelayar ini. Anda boleh salin URL secara manual: " + bioLink);
-            }
         }
     </script>
 </body>
